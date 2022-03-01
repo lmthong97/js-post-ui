@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 import postApi from './api/postApi'
 import { setTextContent, truncateTextlength, getUlPagination } from './utils'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import debounce from 'lodash.debounce'
 
 //to use fromNow function
 dayjs.extend(relativeTime)
@@ -47,7 +48,7 @@ function createPostElement(post) {
 
 function renderPostList(postList) {
   console.log({ postList })
-  if (!Array.isArray(postList) || postList.length === 0) return
+  if (!Array.isArray(postList)) return
 
   const ulElement = document.getElementById('postList')
   if (!ulElement) return
@@ -87,6 +88,9 @@ async function handleFilterChange(filterName, filterValue) {
     //update query params
     const url = new URL(window.location)
     url.searchParams.set(filterName, filterValue)
+
+    if (filterName === 'title_like') url.searchParams.set('_page', 1)
+
     history.pushState({}, '', url)
 
     //fetch API
@@ -140,26 +144,51 @@ function initPagination() {
     nextLink.addEventListener('click', handleNextClick)
   }
 }
-function initURL() {
-  const url = new URL(window.location)
+// function getDefaultParams() {
+//   const url = new URL(window.location)
 
-  //update search params if needed
-  if (!url.searchParams.get('_page')) url.searchParams.set('_page', 1)
-  if (!url.searchParams.get('_limit')) url.searchParams.set('_limit', 6)
+//   //update search params if needed
+//   if (!url.searchParams.get('_page')) url.searchParams.set('_page', 1)
+//   if (!url.searchParams.get('_limit')) url.searchParams.set('_limit', 6)
 
-  history.pushState({}, '', url)
+//   history.pushState({}, '', url)
+//   return url.searchParams
+// }
+
+function initSearch() {
+  const searchInput = document.getElementById('searchInput')
+  if (!searchInput) return
+
+  //set default value from query params
+  //title_like
+
+  const queryParams = new URLSearchParams(window.location.search)
+  if (queryParams.get('title_like')) {
+    searchInput.value = queryParams.get('title_like')
+  }
+
+  const debounceSearch = debounce((e) => handleFilterChange('title_like', e.target.value), 500)
+  searchInput.addEventListener('input', debounceSearch)
 }
 
 ;(async () => {
   try {
+    // set default pagination (_page, _limit) on URL
+    const url = new URL(window.location)
+
+    //update search params if needed
+    if (!url.searchParams.get('_page')) url.searchParams.set('_page', 1)
+    if (!url.searchParams.get('_limit')) url.searchParams.set('_limit', 6)
+
+    history.pushState({}, '', url)
+    const queryParams = url.searchParams
+
     // attach click event for link
     initPagination()
-
-    // set default pagination (_page, _limit) on URL
-    initURL()
+    initSearch()
 
     //render post list base URL params
-    const queryParams = new URLSearchParams(window.location.search)
+    // const queryParams = new URLSearchParams(window.location.search)
     //set default query params if not exists
     const { data, pagination } = await postApi.getAll(queryParams)
     renderPostList(data)
