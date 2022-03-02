@@ -36,6 +36,7 @@ export function createPostElement(post) {
     thumbnailElement.src = post.imageUrl
 
     thumbnailElement.addEventListener('error', () => {
+      console.log('load image error --> use default placeholder')
       thumbnailElement.src = 'https://via.placeholder.com/1368x400?text=thumbnail'
     })
   }
