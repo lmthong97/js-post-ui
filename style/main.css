@@ -38,6 +38,9 @@ a > i {
 .nav__link:hover > i {
   transform: rotate(90deg);
 }
+.nav__link-postdetail:hover > i {
+  transform: rotate(0deg);
+}
 
 /* Add underline for all h1 */
 h1.with-underline {
