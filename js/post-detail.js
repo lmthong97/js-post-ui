@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import postApi from './api/postApi'
-import { setTextContent } from './utils'
+import { registerLightbox, setTextContent } from './utils'
 
 // goToEditPageLink
 // postHeroImage
@@ -54,6 +54,13 @@ function renderPostDetail(post) {
 
 ;(async () => {
   try {
+    registerLightbox({
+      modalId: 'lightbox',
+      imgSelector: 'img[data-id="lightboxImg"]',
+      prevSelector: 'button[data-id="lightboxPrev"]',
+      nextSelector: 'button[data-id="lightboxNext"]',
+    })
+
     //get post id from url
     const searchParams = new URLSearchParams(window.location.search)
     const postId = searchParams.get('id')
