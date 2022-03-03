@@ -40,7 +40,7 @@ export function registerLightbox({ modalId, imgSelector, prevSelector, nextSelec
     //ìmg with data-album
     imgList = document.querySelectorAll(`img[data-album="${target.dataset.album}"]`)
     currentIndex = [...imgList].findIndex((x) => x === target)
-    console.log('album image click', { target, currentIndex, imgList })
+    // console.log('album image click', { target, currentIndex, imgList })
 
     showImageAtIndex(currentIndex)
 

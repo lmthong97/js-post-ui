@@ -12,3 +12,16 @@ export function truncateTextlength(text, length) {
 
   return truncatedText
 }
+export function setFieldValue(form, selector, text) {
+  if (!form) return
+
+  const field = form.querySelector(selector)
+  if (field) field.value = text
+}
+
+export function setBackgroundImage(parent, selector, imageUrl) {
+  if (!parent) return
+
+  const element = parent.querySelector(selector)
+  if (element) element.style.backgroundImage = `url("${imageUrl}")`
+}
