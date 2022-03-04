@@ -16,7 +16,11 @@ export function createPostElement(post) {
 
   //update title, author, thumbnail
   setTextContent(liElement, '[data-id="title"]', post.title)
-  setTextContent(liElement, '[data-id="description"]', truncateTextlength(post.description, 100))
+  setTextContent(
+    liElement,
+    '[data-id="description"]',
+    truncateTextlength(post.description, 100)
+  )
   setTextContent(liElement, '[data-id="author"]', post.author)
   // const titleElement = liElement.querySelector('[data-id="title"]')
   // if (titleElement) titleElement.textContent = post.title
@@ -29,7 +33,11 @@ export function createPostElement(post) {
 
   //calculator time update
 
-  setTextContent(liElement, '[data-id="timeSpan"]', `- ${dayjs(post.updatedAt).fromNow()}`)
+  setTextContent(
+    liElement,
+    '[data-id="timeSpan"]',
+    `- ${dayjs(post.updatedAt).fromNow()}`
+  )
 
   const thumbnailElement = liElement.querySelector('[data-id="thumbnail"]')
   if (thumbnailElement) {
@@ -37,7 +45,8 @@ export function createPostElement(post) {
 
     thumbnailElement.addEventListener('error', () => {
       console.log('load image error --> use default placeholder')
-      thumbnailElement.src = 'https://via.placeholder.com/1368x400?text=thumbnail'
+      thumbnailElement.src =
+        'https://via.placeholder.com/1368x400?text=thumbnail'
     })
   }
   //attach event
@@ -61,6 +70,18 @@ export function createPostElement(post) {
       // e.stopPropagation()
 
       window.location.assign(`/add-edit-post.html?id=${post.id}`)
+    })
+  }
+
+  // remove click event for button
+  const removeButton = liElement.querySelector('[data-id="remove"]')
+  if (removeButton) {
+    removeButton.addEventListener('click', () => {
+      const customEvent = new CustomEvent('post-delete', {
+        bubbles: true,
+        detail: post,
+      })
+      removeButton.dispatchEvent(customEvent)
     })
   }
 
