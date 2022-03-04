@@ -154,6 +154,23 @@ async function validatePostForm(form, formValues) {
   return isValid
 }
 
+async function validateFormField(form, formValues, name) {
+  try {
+    // clear previous error
+    setFieldError(form, name, '')
+
+    const schema = getPostSchema()
+    await schema.validateAt(name, formValues)
+  } catch (error) {
+    setFieldError(form, name, error.message)
+  }
+  // show validation error
+  const field = form.querySelector(`[name="${name}"]`)
+  if (field && !field.checkValidity()) {
+    field.parentElement.classList.add('was-validated')
+  }
+}
+
 function showLoading(form) {
   const button = form.querySelector('[name="submit"]')
   if (button) {
@@ -209,6 +226,28 @@ function initUploadImage(form) {
     if (fileImage) {
       const imageUrl = URL.createObjectURL(fileImage)
       setBackgroundImage(document, '#postHeroImage', imageUrl)
+
+      // trigger validation of upload input
+      validateFormField(
+        form,
+        {
+          imageSource: ImageSource.UPLOAD,
+          image: fileImage,
+        },
+        'image'
+      )
+    }
+  })
+}
+
+function initValidationOnChange(form) {
+  ;['title', 'author'].forEach((name) => {
+    const field = form.querySelector(`[name="${name}"]`)
+    if (field) {
+      field.addEventListener('input', (event) => {
+        const newValue = event.target.value
+        validateFormField(form, { [name]: newValue }, name)
+      })
     }
   })
 }
@@ -225,6 +264,7 @@ export function initPostForm({ formId, defaultValue, onSubmit }) {
   innitRandomImage(form)
   initRadioImageSource(form)
   initUploadImage(form)
+  initValidationOnChange(form)
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault()
