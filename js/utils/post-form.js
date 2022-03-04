@@ -6,6 +6,10 @@ import {
 } from './common'
 import * as yup from 'yup'
 
+const ImageSource = {
+  PICSUM: 'picsum',
+  UPLOAD: 'upload',
+}
 function setFormValue(form, formValue) {
   setFieldValue(form, '[name="title"]', formValue?.title)
   setFieldValue(form, '[name="author"]', formValue?.author)
@@ -61,10 +65,32 @@ function getPostSchema() {
           value.split(' ').filter((x) => !!x && x.length >= 3).length >= 2
       ),
     description: yup.string(),
-    imageUrl: yup
+    imageSource: yup
       .string()
-      .required('Please radom a background image')
-      .url('Please enter a valid URL'),
+      .required('Please select an image source')
+      .oneOf([ImageSource.PICSUM, ImageSource.UPLOAD], 'Invalid image source'),
+    imageUrl: yup.string().when('imageSource', {
+      is: ImageSource.PICSUM,
+      then: yup
+        .string()
+        .required('Please radom a background image')
+        .url('Please enter a valid URL'),
+    }),
+    image: yup.mixed().when('imageSource', {
+      is: ImageSource.UPLOAD,
+      then: yup
+        .mixed()
+        .test('required', 'Please an image to upload', (file) =>
+          Boolean(file?.name)
+        )
+        .test('max-3mb', 'The image is too large (max 3MB)', (file) => {
+          const fileSize = file?.size || 0
+          // const MAX_SIZE = 3 * 1024 * 1024 // 3 MB
+          const MAX_SIZE = 10 * 1024 // 10 KB
+
+          return fileSize <= MAX_SIZE
+        }),
+    }),
   })
 }
 
@@ -96,7 +122,7 @@ async function validatePostForm(form, formValues) {
   //   }
   try {
     //reset prev error
-    ;['title', 'author', 'imageUrl'].forEach((name) =>
+    ;['title', 'author', 'imageUrl', 'image'].forEach((name) =>
       setFieldError(form, name, '')
     )
 
