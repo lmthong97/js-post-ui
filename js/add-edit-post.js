@@ -1,10 +1,11 @@
 import postApi from './api/postApi'
-import { initPostForm } from './utils/post-form'
+import { initPostForm, toast } from './utils'
 
 async function handlePostFormSubmit(formValues) {
   //   console.log('submit from parent', formValues)
 
   try {
+    // throw new Error('something from testing')
     //check add/edit mode
     //S1: based on search params (check id)
     //S2: check id in formValue
@@ -16,17 +17,22 @@ async function handlePostFormSubmit(formValues) {
     //   savedPost = await postApi.add(formValues)
     // }
 
+    // call Api
     const savedPost = formValues.id
       ? await postApi.update(formValues)
       : await postApi.add(formValues)
 
-    // call Api
     // show success message
+    toast.success('Saved post successfully!')
+
     // redirect to detail page
-    window.location.assign(`/post-detail.html?id=${formValues.id}`)
+    setTimeout(() => {
+      window.location.assign(`/post-detail.html?id=${formValues.id}`)
+    }, 2000)
+
     // console.log('redirect to', formValues.id)
   } catch (error) {
-    console.log('failed to save post', error)
+    toast.error(`Error: ${error.message}`)
   }
 }
 
