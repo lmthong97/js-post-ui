@@ -5,23 +5,36 @@ function removeUnusedFields(formValues) {
   const payload = { ...formValues }
   // imageSource = 'picsum' --> remove image
   // imageSource = 'upload' --> remove imageUrl
-  // finally remove imageSource
   if (payload.imageSource === 'upload') {
     delete payload.imageUrl
   } else {
     delete payload.image
   }
 
+  // finally remove imageSource
   delete payload.imageSource
+
+  // remove id if it's add mode
+  if (!payload.id) delete payload.id
   return payload
 }
 
-async function handlePostFormSubmit(formValues) {
-  const payload = removeUnusedFields(formValues)
-  console.log('submit from parent', { formValues, payload })
-  return
+function jsonToFormData(jsonObject) {
+  const formData = new FormData()
 
+  for (const key in jsonObject) {
+    formData.set(key, jsonObject[key])
+  }
+
+  return formData
+}
+
+async function handlePostFormSubmit(formValues) {
   try {
+    const payload = removeUnusedFields(formValues)
+    // console.log('submit from parent', { formValues, payload })
+
+    const formData = jsonToFormData(payload)
     // throw new Error('something from testing')
     //check add/edit mode
     //S1: based on search params (check id)
@@ -36,8 +49,8 @@ async function handlePostFormSubmit(formValues) {
 
     // call Api
     const savedPost = formValues.id
-      ? await postApi.update(formValues)
-      : await postApi.add(formValues)
+      ? await postApi.updateFormData(formData)
+      : await postApi.addFormData(formData)
 
     // show success message
     toast.success('Saved post successfully!')

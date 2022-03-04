@@ -85,8 +85,8 @@ function getPostSchema() {
         )
         .test('max-3mb', 'The image is too large (max 3MB)', (file) => {
           const fileSize = file?.size || 0
-          // const MAX_SIZE = 3 * 1024 * 1024 // 3 MB
-          const MAX_SIZE = 10 * 1024 // 10 KB
+          const MAX_SIZE = 3 * 1024 * 1024 // 3 MB
+          // const MAX_SIZE = 10 * 1024 // 10 KB
 
           return fileSize <= MAX_SIZE
         }),
