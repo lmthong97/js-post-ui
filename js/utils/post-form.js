@@ -1,4 +1,9 @@
-import { setBackgroundImage, setFieldValue, setTextContent } from './common'
+import {
+  setBackgroundImage,
+  setFieldValue,
+  setTextContent,
+  randomNumber,
+} from './common'
 import * as yup from 'yup'
 
 function setFormValue(form, formValue) {
@@ -56,6 +61,10 @@ function getPostSchema() {
           value.split(' ').filter((x) => !!x && x.length >= 3).length >= 2
       ),
     description: yup.string(),
+    imageUrl: yup
+      .string()
+      .required('Please radom a background image')
+      .url('Please enter a valid URL'),
   })
 }
 
@@ -87,7 +96,9 @@ async function validatePostForm(form, formValues) {
   //   }
   try {
     //reset prev error
-    ;['title', 'author'].forEach((name) => setFieldError(form, name, ''))
+    ;['title', 'author', 'imageUrl'].forEach((name) =>
+      setFieldError(form, name, '')
+    )
 
     // start validating
     const schema = getPostSchema()
@@ -132,6 +143,20 @@ function hideLoading(form) {
   }
 }
 
+function innitRandomImage(form) {
+  const randomButton = document.getElementById('postChangeImage')
+  if (!randomButton) return
+
+  randomButton.addEventListener('click', () => {
+    // random ID
+    // build URL
+    const imageUrl = `https://picsum.photos/id/${randomNumber(1000)}/1368/400`
+    // set imageUrl input and background
+    setFieldValue(form, '[name="imageUrl"]', imageUrl) // hidden field
+    setBackgroundImage(document, '#postHeroImage', imageUrl)
+  })
+}
+
 export function initPostForm({ formId, defaultValue, onSubmit }) {
   const form = document.getElementById(formId)
   if (!form) return
@@ -139,6 +164,9 @@ export function initPostForm({ formId, defaultValue, onSubmit }) {
   let submitting = false
 
   setFormValue(form, defaultValue)
+
+  // init event
+  innitRandomImage(form)
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault()
@@ -158,10 +186,9 @@ export function initPostForm({ formId, defaultValue, onSubmit }) {
     //if valid trigger submit callback
     //otherwise, show validation errors
     const isValid = await validatePostForm(form, formValues)
-    if (!isValid) return
+    if (isValid) await onSubmit?.(formValues)
 
-    await onSubmit?.(formValues)
-
+    // always hide loading no matter form is valid or not
     hideLoading(form)
     submitting = false
   })
